@@ -1,7 +1,49 @@
-ky pn bol.. tari i6a.. kmk hv cntrl jse maro p6i... 
+/* =========================================================
+   LOAD SALES
+========================================================= */
 
-ha to sui j jav tame
-have hu jami lav choline khavanu che to left hand thi typing nai fave so...
-ok to sanje vat kari lv.. lv u ms u kss u.. fuck u.. bau bdhu
+const loadSales = useCallback(async () => {
+  try {
+    setLoading(true);
 
-😘😘
+    const r: any = await listSalesItems({
+      search,
+      from: fromDate || undefined,
+      to: toDate || undefined,
+      page,
+      limit,
+    });
+
+    if (!r?.ok) throw new Error();
+
+    const normalized = (r.results || []).map((s: any) => {
+      let diamonds = [];
+
+      try {
+        diamonds =
+          typeof s.diamonds === "string"
+            ? JSON.parse(s.diamonds)
+            : s.diamonds || [];
+      } catch {
+        diamonds = [];
+      }
+
+      return {
+        ...s,
+        diamonds,
+      };
+    });
+
+    setItems(normalized);
+    setCount(r.count || 0);
+
+  } catch {
+    toast.error("Failed to load sales");
+  } finally {
+    setLoading(false);
+  }
+}, [search, fromDate, toDate, page, limit]);
+
+useEffect(() => {
+  loadSales();
+}, [loadSales]);
